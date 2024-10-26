@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import supabase from './supabaseClient'
 
 function App() {
+  const [rooms, setRooms] = useState([]);
+
+  // Create a function to handle inserts
+  const handleInserts = (payload) => {
+    console.log('Change received!', payload)
+    setRooms(payload)
+  }
+  // Listen to inserts
+  supabase
+    .channel('rooms')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rooms' }, handleInserts)
+    .subscribe()
+
+  useEffect(() => {
+    getCountries()
+  }, [])
+
+  const getCountries = async () => {
+    const { data } = await supabase.from('rooms').select()
+    setRooms(data)
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <ul>
+      {rooms.map((country) => (
+        <li key={country.name}>{country.name}</li>
+      ))}
+    </ul>
+  )
 }
 
-export default App;
+export default App
