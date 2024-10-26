@@ -1,35 +1,20 @@
-import { useEffect, useState } from "react";
-import supabase from './supabaseClient'
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import AuthPage from './pages/AuthPage'
+import RoomsPage from './pages/RoomsPage'
+import GamePage from './pages/GamePage'
 
-function App() {
-  const [rooms, setRooms] = useState([]);
-
-  // Create a function to handle inserts
-  const handleInserts = (payload) => {
-    console.log('Change received!', payload)
-    setRooms(payload)
-  }
-  // Listen to inserts
-  supabase
-    .channel('rooms')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rooms' }, handleInserts)
-    .subscribe()
-
-  useEffect(() => {
-    getCountries()
-  }, [])
-
-  const getCountries = async () => {
-    const { data } = await supabase.from('rooms').select()
-    setRooms(data)
-  }
-
+const App = () => {
   return (
-    <ul>
-      {rooms.map((country) => (
-        <li key={country.name}>{country.name}</li>
-      ))}
-    </ul>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/rooms" element={<RoomsPage />} />
+        <Route path="/game/:id" element={<GamePage />} />
+      </Routes>
+    </Router>
   )
 }
 
