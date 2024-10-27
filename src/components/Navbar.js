@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getUserInfo } from '../services/authService';
 
 const Navbar = () => {
     const navigate = useNavigate()
@@ -11,9 +12,35 @@ const Navbar = () => {
         navigate(-1); // Navigate back to the previous page
     };
 
+    const handleUserPage = async () => {
+        const user = await getUserInfo()
+
+        console.log(9, user)
+
+        if (user)
+            navigate(`/user/${user.id}`)
+    }
+
+
+    const [isUser, setIsUser] = useState(false)
+
+    const handleUserCheck = async () => {
+        try {
+            const res = await getUserInfo()
+            console.log(30, res)
+
+            if (!res) return setIsUser(false)
+            if (res) return setIsUser(true)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
         console.log(location)
         setCurrentPath(location.pathname)
+
+        handleUserCheck()
     }, [location])
 
     return (
@@ -26,13 +53,15 @@ const Navbar = () => {
                 </button>
             )}
 
-            <div style={styles.accountIcon}>
+            {isUser ? (<div style={styles.accountIcon}>
                 <img
                     src="https://via.placeholder.com/30" // Placeholder for account icon
                     alt="Account Icon"
                     style={styles.icon}
+                    onClick={handleUserPage}
                 />
-            </div>
+            </div>) : (<div style={styles.flexBox}></div>)}
+
         </nav>
     );
 };

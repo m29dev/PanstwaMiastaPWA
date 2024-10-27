@@ -10,10 +10,31 @@ export const getUserInfo = async () => {
     }
 }
 
+export const getUserData = async (id) => {
+    try {
+        const dataUser = await supabase
+            .from('users')
+            .select()
+            .eq('id', +id)
+            .single()
+
+        if (!dataUser) return
+
+        const userObject = {
+            id: dataUser.data.id,
+            name: dataUser.data.name
+        }
+
+        return userObject
+    } catch (err) {
+        console.log(err)
+    }
+}
+
 export const signUp = async (name, password) => {
     try {
         // check if name already exists
-        const { dataCheck } = await supabase
+        const dataCheck = await supabase
             .from('users') // Change 'users' to your table name
             .select()
             .eq('name', name)
