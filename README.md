@@ -1,1 +1,1 @@
-Build: https://staging.d197bvbh6v6p9f.amplifyapp.com/
+https://staging.d1icr9v2ozczhy.amplifyapp.com/
