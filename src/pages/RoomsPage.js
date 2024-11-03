@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from "../components/Navbar";
 import CardBox from "../components/CardBox";
 import { getUserInfo } from "../services/authService";
+import { MdKeyboardArrowRight } from "react-icons/md";
 
 function RoomsPage() {
     const navigate = useNavigate()
@@ -20,7 +21,7 @@ function RoomsPage() {
                 id: user.id,
                 name: user.name,
                 points: 0,
-                answers: [],
+                answers: null,
                 ready: false,
             }
 
@@ -34,7 +35,7 @@ function RoomsPage() {
             if (!dataRoom) return alert('error, could not create a room')
 
             console.log(23, dataRoom.data[0])
-            navigate(`/game/${dataRoom.data[0].id}`)
+            navigate(`/rooms/${dataRoom.data[0].id}`)
 
         } catch (err) {
             console.log(err)
@@ -61,21 +62,23 @@ function RoomsPage() {
         <>
             <Navbar></Navbar>
 
-            <div style={styles.inputContainer}>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    style={styles.input}
-                    required
-                />
-
-                <button type="submit" onClick={handleCreateRoom} style={styles.button}>
-                    Create
-                </button>
-            </div>
-
             <div style={styles.container}>
+                <div style={styles.iBox}>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Create new game..."
+                        style={styles.roundedInput}
+                        required
+
+                    />
+                    <button type="submit" style={styles.submitButton} onClick={handleCreateRoom}>
+                        <MdKeyboardArrowRight style={styles.iconBox} />
+                    </button>
+                </div>
+
+
                 {rooms.map((room, index) => (
                     <CardBox
                         key={index}
@@ -90,6 +93,50 @@ function RoomsPage() {
 }
 
 const styles = {
+
+    iBox: {
+        display: 'flex',
+        flexDirection: 'row',
+
+        alignItems: 'center',
+        border: '2px solid #ccc',
+        borderRadius: '25px',
+        // padding: '5px',
+        // width: '300px',
+        overflow: 'hidden',
+        margin: 'auto',
+        marginBottom: '30px',
+        flex: 1,
+        width: '100%'
+    },
+
+    roundedInput: {
+        border: 'none',
+        outline: 'none',
+        flexGrow: 1,
+        padding: '10px 10px',
+        borderRadius: '25px 0 0 25px', /* Rounded on the left */
+    },
+
+    submitButton: {
+        backgroundColor: '#007bff', /* Button color */
+        color: 'white',
+        border: 'none',
+        borderRadius: '25px', /* Rounded on the right */
+        // padding: '5px 15px',
+        height: '35px',
+        width: '40px',
+        cursor: 'pointer',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    iconBox: {
+        height: '30px',
+        width: '30px'
+    },
+
     container: {
         padding: '30px',
         display: 'flex',
@@ -100,7 +147,7 @@ const styles = {
         height: '100%',
         // maxHeight: 'calc(100vh - 60px)',
         textAlign: 'center',
-        backgroundColor: '#f4f4f9',
+        // backgroundColor: '#f4f4f9',
         fontFamily: 'Arial, sans-serif',
         // overflowY: 'auto', // Enable vertical scroll
     },
@@ -131,6 +178,8 @@ const styles = {
 
     inputContainer: {
         marginBottom: '15px',
+        width: '80%',
+        margin: 'auto'
     },
     label: {
         display: 'block',

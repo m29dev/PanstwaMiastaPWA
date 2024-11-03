@@ -1,243 +1,364 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-// import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import React, { useEffect, useState } from 'react'
 import supabase from "../supabaseClient"
+import { useParams } from 'react-router-dom';
 import { getUserInfo } from '../services/authService';
-
+import { fetchGameInfo, getGameInfo, restartGame, updateGameInfo, updateGameInfoReview } from '../services/gameService';
+import Navbar from '../components/Navbar';
+import NavbarGame from '../components/NavbarGame';
 
 const GamePage = () => {
-    // const navigate = useNavigate()
-
     const { id } = useParams()
-    const [user, setUser] = useState(null)
-    const [game, setGame] = useState([])
+    const [panstwo, setPanstwo] = useState('')
+    const [miasto, setMiasto] = useState('')
+    const [imie, setImie] = useState('')
+    const [marka, setMarka] = useState('')
 
-    const joinGame = async () => {
+    const [panstwoBox, setPanstwoBox] = useState(true)
+    const [miastoBox, setMiastoBox] = useState(true)
+    const [imieBox, setImieBox] = useState(true)
+    const [markaBox, setMarkaBox] = useState(true)
+
+    const [userInfo, setUserInfo] = useState('')
+    const [gameInfo, setGameInfo] = useState('')
+    const [displayData, setDisplayData] = useState({})
+    const [check, setCheck] = useState(false)
+    const [gameStatus, setGameStatus] = useState(true)
+
+    const handleNewGame = async () => {
+        try {
+            const res = await restartGame(id)
+            console.log(res)
+            if (res) {
+                setGameStatus(true)
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    // Simple function to log any messages we receive
+    const messageReceived = async (payload) => {
+        console.log(payload)
+        const res = await updateGameInfo(id, { panstwo, miasto, imie, marka }, true)
+
+        // clean
+        setPanstwo('')
+        setMiasto('')
+        setImie('')
+        setMarka('')
+
+        if (!res) return console.log('could not send answers')
+        // fetchGameInfo()
+    }
+
+    const channel = supabase.channel(`room${id}`)
+
+    channel
+        .on(
+            'broadcast',
+            { event: 'onSendAnswers' },
+            (payload) => messageReceived(payload)
+        )
+        .subscribe()
+
+    const onGameInit = async () => {
         try {
             const user = await getUserInfo()
-            const gameObject = await supabase
-                .from('rooms')
-                .select()
-                .eq('id', id)
+            setUserInfo(user)
 
-            if (!gameObject) return
-            const game = gameObject?.data[0]
+            const game = await fetchGameInfo(id)
+            if (!game.started) return setGameStatus(false)
 
-            if (!game) return
-
-            // check if already a player
-            if (game?.player0?.id === user.id) return console.log('player0 rejoined')
-            if (game?.player1?.id === user.id) return console.log('player1 rejoined')
-
-            // check if can join as a new player
-            if (game.player1) return console.log('room already full')
-
-            const playerObject = {
-                id: user.id,
-                name: user.name,
-                points: 0,
-                answers: [],
-                ready: false,
-            }
-
-            const gameUpdate = await supabase
-                .from('rooms')
-                .update([
-                    { player1: playerObject }
-                ])
-                .eq('id', id)
-                .select()
-
-            if (gameUpdate) console.log('player1 has joined the game')
-            getGameInfo()
+            console.log(24, user)
         } catch (err) {
             console.log(err)
         }
     }
 
-    const handlePlayerReady = async () => {
-        try {
-            console.log('switch ready')
-
-            const user = await getUserInfo()
-
-            const data = await supabase
-                .from('rooms')
-                .select()
-                .eq('id', id)
-
-            const game = data.data[0]
-
-            const updatePlayer1 = async () => {
-                try {
-                    game.player1.ready = !game.player1.ready
-                    console.log('UPDATING PLAYER1 ', game.player1)
-                    const update1 = await supabase
-                        .from('rooms')
-                        .update({ player1: game.player1 })
-                        .eq('id', id)
-                        .select()
-
-                    if (!update1) return console.log('error')
-                } catch (err) {
-                    console.log(err)
-                }
-            }
-
-            const updatePlayer0 = async () => {
-                try {
-                    game.player0.ready = !game.player0.ready
-                    console.log('UPDATING PLAYER0', game.player0)
-
-                    const update0 = await supabase
-                        .from('rooms')
-                        .update({ player0: game.player0 })
-                        .eq('id', id)
-                        .select()
-
-                    if (!update0) return console.log('error')
-                } catch (err) {
-                    console.log(err)
-                }
-            }
-
-            // check if player0 or player1
-            if (game.player0.id === user.id) updatePlayer0()
-
-            // check if player0 or player1
-            if (game.player1.id === user.id) updatePlayer1()
-
-            // getGameInfo()
-        } catch (err) {
-            console.log(err)
+    const handleSubmit = async () => {
+        console.log('submit')
+        const ansObject = {
+            panstwo, miasto, imie, marka
         }
+
+        const res = await updateGameInfo(id, ansObject, false)
+        if (!res) return console.log('could not sent answers')
+
+        // Send a message once the client is subscribed
+        channel.send({
+            type: 'broadcast',
+            event: 'onSendAnswers',
+            payload: { message: `${userInfo.name} has sent data. Init same for current player` },
+        })
+
+        // clean
+        setPanstwo('')
+        setMiasto('')
+        setImie('')
+        setMarka('')
+
+        console.log(res)
     }
 
-    const getGameInfo = async () => {
-        try {
-            const data = await supabase
-                .from('rooms')
-                .select()
-                .eq('id', id)
+    const handleSubmitReview = async () => {
+        console.log('submit review')
 
-            const dataGame = data.data[0]
-            setGame(dataGame)
+        let points = 0
+        if (panstwoBox) points += 10
+        if (miastoBox) points += 10
+        if (imieBox) points += 10
+        if (markaBox) points += 10
 
-            // check if ready
-            if (dataGame.player0.ready && dataGame.player1.ready) {
-                console.log('START THE GAME')
-            }
-        } catch (err) {
-            console.log(err)
-        }
+        const res = await updateGameInfoReview(id, points)
+        console.log(res)
+        // 
     }
 
-    const getUser = async () => {
-        try {
-            const user = await getUserInfo()
-            setUser(user)
-        } catch (err) {
-            console.log(err)
-        }
-    }
+    const onGameUpdate = async () => {
+        // GAME
+        const game = await fetchGameInfo(id)
+        if (!game) return console.log('could not fetch game info')
 
-    useEffect(() => {
-        getUser()
-        getGameInfo()
-        joinGame()
-    }, [])
-
-    const gameUpdate = () => {
-        console.log('101 UPDATE')
-        getGameInfo()
+        const gameInfo = await getGameInfo()
+        setGameInfo(gameInfo)
     }
 
     // Listen to inserts
     supabase
         .channel('rooms')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${id}` }, gameUpdate)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${id}` }, onGameUpdate)
         .subscribe()
+
+    useEffect(() => {
+        onGameInit()
+        onGameUpdate()
+    }, [])
 
     return (
         <>
-            <Navbar></Navbar>
-            {/* <div>
-                <h1>Game Page</h1>
-                <p>Welcome to the Game Page!</p>
-                <h2>{id}</h2>
-            </div> */}
+            <NavbarGame></NavbarGame>
 
-            <div style={styles.pageContainer}>
-                {/* Player 1 Card */}
-                {game.player0 ?
-                    (
-                        <div style={styles.playerCard}>
-                            <h2 style={styles.playerName}>{game?.player0?.name}</h2>
+            {gameStatus && (
+                <>
+                    <div>
+                        PTS: {gameInfo?.player0?.id === userInfo?.id ? gameInfo?.player0?.points : gameInfo?.player1?.points}
+                    </div>
+                    <div>
+                        ROUND: {gameInfo?.round}/3
+                    </div>
 
-                            {game?.player0?.id === user?.id && !game?.player0?.ready && (
-                                <button onClick={handlePlayerReady}>Ready</button>
-                            )}
+                    {!gameInfo?.review && (
+                        <div style={styles.container}>
+                            {/* panstwo */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Panstwo:</label>
+                                <input
+                                    type="text"
+                                    value={panstwo}
+                                    onChange={(e) => setPanstwo(e.target.value)}
+                                    style={styles.input}
+                                    required
+                                />
+                            </div>
+
+                            {/* miasto */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Miasto:</label>
+                                <input
+                                    type="text"
+                                    value={miasto}
+                                    onChange={(e) => setMiasto(e.target.value)}
+                                    style={styles.input}
+                                    required
+                                />
+                            </div>
+
+                            {/* imie */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Imie:</label>
+                                <input
+                                    type="text"
+                                    value={imie}
+                                    onChange={(e) => setImie(e.target.value)}
+                                    style={styles.input}
+                                    required
+                                />
+                            </div>
+
+                            {/* marka */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Marka:</label>
+                                <input
+                                    type="text"
+                                    value={marka}
+                                    onChange={(e) => setMarka(e.target.value)}
+                                    style={styles.input}
+                                    required
+                                />
+                            </div>
+
+                            <div style={styles.btnBox}>
+                                <button type="submit" onClick={handleSubmit} style={styles.button}>
+                                    CZAS STOP
+                                </button>
+
+                            </div>
                         </div>
-                    )
-                    :
-                    (
-                        <div style={styles.playerCard}>
-                            <h2 style={styles.playerName}>Waiting for a player to join</h2>
+                    )}
+
+                    {gameInfo?.review && (
+                        <div style={styles.container}>
+                            {/* panstwo */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Panstwo:</label>
+                                <p>{
+                                    gameInfo?.player0?.id === userInfo?.id
+                                        ?
+                                        gameInfo?.player1?.answers?.panstwo
+                                        :
+                                        gameInfo?.player0?.answers?.panstwo
+                                }
+                                </p>
+                                <input
+                                    type="checkbox"
+                                    checked={panstwoBox}
+                                    onChange={() => setPanstwoBox((state) => !state)}
+                                />
+                            </div>
+
+                            {/* miasto */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Miasto:</label>
+                                <p>{
+                                    gameInfo?.player0?.id === userInfo?.id
+                                        ?
+                                        gameInfo?.player1?.answers?.miasto
+                                        :
+                                        gameInfo?.player0?.answers?.miasto
+                                }
+                                </p>
+                                <input
+                                    type="checkbox"
+                                    checked={miastoBox}
+                                    onChange={() => setMiastoBox((state) => !state)}
+                                />
+                            </div>
+
+                            {/* imie */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Imie:</label>
+                                <p>{
+                                    gameInfo?.player0?.id === userInfo?.id
+                                        ?
+                                        gameInfo?.player1?.answers?.imie
+                                        :
+                                        gameInfo?.player0?.answers?.imie
+                                }
+                                </p>
+                                <input
+                                    type="checkbox"
+                                    checked={imieBox}
+                                    onChange={() => setImieBox((state) => !state)}
+                                />
+                            </div>
+
+                            {/* marka */}
+                            <div style={styles.inputContainer}>
+                                <label style={styles.label}>Marka:</label>
+                                <p>{
+                                    gameInfo?.player0?.id === userInfo?.id
+                                        ?
+                                        gameInfo?.player1?.answers?.marka
+                                        :
+                                        gameInfo?.player0?.answers?.marka
+                                }
+                                </p>
+                                <input
+                                    type="checkbox"
+                                    checked={markaBox}
+                                    onChange={() => setMarkaBox((state) => !state)}
+                                />
+                            </div>
+
+                            <div style={styles.btnBox}>
+                                <button type="submit" onClick={handleSubmitReview} style={styles.button}>
+                                    WYŚLIJ OCENE
+                                </button>
+                            </div>
                         </div>
-                    )
-                }
+                    )}
+                </>
+            )}
 
-                {/* Player 1 Card */}
-                {game.player1 ?
-                    (<div style={styles.playerCard}>
-                        <h2 style={styles.playerName}>{game?.player1?.name}</h2>
 
-                        {game?.player1?.id === user?.id && !game?.player1?.ready && (
-                            <button onClick={handlePlayerReady}>Ready</button>
-                        )}
-                    </div>)
-                    :
-                    (<div style={styles.playerCard}>
-                        <h2 style={styles.playerName}>Waiting for a player to join</h2>
-                    </div>)}
 
-            </div>
+
+            {!gameStatus && (
+                <div>
+                    <h3> Game Over!</h3>
+
+                    <h1>
+                        Player {gameInfo.player0.points > gameInfo.player1.points ? gameInfo.player0.name : gameInfo.player1.name} won!
+                    </h1>
+
+
+                    <p>Score: {gameInfo.player0.name}, {gameInfo.player0.points} pts : {gameInfo.player1.name}, {gameInfo.player1.points} pts</p>
+
+                    <button onClick={handleNewGame}>New Game</button>
+                </div>
+            )}
+
         </>
     )
 }
 
 const styles = {
-    pageContainer: {
+    container: {
+        padding: '20px',
+        backgroundColor: '#f4f4f9',
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+        marginTop: '20px',
+        margin: 'auto',
+        height: '100%'
+    },
+    inputContainer: {
+        marginBottom: '15px',
+    },
+    label: {
+        display: 'block',
+        marginBottom: '5px',
+    },
+    input: {
+        width: '100%',
+        height: '30px',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+    },
+    btnBox: {
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        // padding: '20px',
-        backgroundColor: '#f4f4f8',
-        height: 'calc(100vh - 60px)',
-        maxHeight: 'calc(100vh - 60px)'
+        justifyContent: 'space-between'
     },
-
-    playerCard: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '10px',
-        backgroundColor: '#eef',
-        borderRadius: '8px',
-        width: '80%',
-        textAlign: 'center',
-        flex: 1,
+    button: {
+        padding: '10px 15px',
+        backgroundColor: '#007BFF',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
     },
-    playerName: {
-        fontSize: '1.5rem',
-        marginBottom: '10px',
+    buttonSecond: {
+        padding: '10px 15px',
+        backgroundColor: '#777777',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
     },
-    matchDetails: {
-        textAlign: 'center',
-        fontSize: '1.2rem',
-        color: '#333',
+    error: {
+        color: 'red',
     },
 };
 

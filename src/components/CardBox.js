@@ -5,7 +5,7 @@ const CardBox = ({ title, id }) => {
     const navigate = useNavigate()
 
     return (
-        <div style={styles.card} onClick={() => navigate(`/game/${id}`)}>
+        <div style={styles.card} onClick={() => navigate(`/rooms/${id}`)}>
             <div style={styles.content}>
                 <h3 style={styles.title}>{title}</h3>
             </div>

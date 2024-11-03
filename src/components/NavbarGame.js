@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getUserInfo } from '../services/authService';
 import { FaRegArrowAltCircleLeft } from "react-icons/fa";
 
-const Navbar = () => {
+const NavbarGame = () => {
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -11,7 +11,7 @@ const Navbar = () => {
 
     const handleGoBack = () => {
         // if in game navigate to rooms
-        navigate(-1); // Navigate back to the previous page
+        navigate('/rooms'); // Navigate back to the previous page
     };
 
     const handleUserPage = async () => {
@@ -76,9 +76,9 @@ const styles = {
         alignItems: 'center',
         padding: '10px 20px',
         backgroundColor: '#007BFF',
+        borderRadius: '0px 0px 25px 25px',
         color: '#fff',
-        height: '40px',
-        borderRadius: '0px 0px 25px 25px'
+        height: '40px'
     },
     backButton: {
         // padding: '8px 16px',
@@ -104,4 +104,4 @@ const styles = {
     },
 }
 
-export default Navbar
+export default NavbarGame
