@@ -76,8 +76,11 @@ export const signIn = async (name, password) => {
             .select('*')
             .eq('name', name)
 
-        if (!dataUser) return alert('wrong username or password')
-        if (dataUser.data[0].password !== password) return alert('wrong username or password')
+        console.log(1, dataUser)
+
+        if (!dataUser) return { error: 'wrong username or password' }
+        if (dataUser.data.length < 1) return { error: 'wrong username or password' }
+        if (dataUser.data[0].password !== password) return { error: 'wrong username or password' }
 
         console.log("Successful SignIn: ", dataUser)
 
@@ -87,7 +90,7 @@ export const signIn = async (name, password) => {
         }
 
         localStorage.setItem('userInfo', JSON.stringify(userObject))
-        return true
+        return dataUser
     }
     catch (err) {
         console.log(err)

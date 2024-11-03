@@ -28,9 +28,7 @@ const HomePage = () => {
                     Welcome to the Panstwa Miasta game! Challenge your knowledge of countries, cities, and more.
                 </p>
                 <div style={styles.buttonContainer}>
-                    <button style={styles.button} onClick={handleSignIn}>
-                        Sign In
-                    </button>
+
                     <button style={styles.button} onClick={handlePlay}>
                         Play
                     </button>
@@ -46,9 +44,9 @@ const styles = {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100vh',
+        height: 'calc(100vh - 60px)',
         textAlign: 'center',
-        backgroundColor: '#f4f4f9',
+        // backgroundColor: '#f4f4f9',
         fontFamily: 'Arial, sans-serif',
     },
     title: {

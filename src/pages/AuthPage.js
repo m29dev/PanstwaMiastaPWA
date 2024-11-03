@@ -31,6 +31,11 @@ const SignIn = () => {
 
     const switchAuth = () => {
         setAuth(state => !state)
+
+        // Reset fields
+        setName('')
+        setPassword('')
+        setError('')
     }
 
     const handleSubmit = async (e) => {
@@ -43,12 +48,28 @@ const SignIn = () => {
 
         if (auth) {
             const res = await signIn(name, password)
-            if (res) userInfoCheck()
+
+            // Reset fields
+            setName('')
+            setPassword('')
+            setError('')
+
+            if (!res) return setError('404')
+            if (res?.error) return setError(res.error)
+
+            userInfoCheck()
+
             console.log('SignIn with', { name, password })
         }
 
         if (!auth) {
             const res = await signUp(name, password)
+
+            // Reset fields
+            setName('')
+            setPassword('')
+            setError('')
+
             if (res) userInfoCheck()
             console.log('SignUp with', { name, password })
         }
@@ -63,6 +84,20 @@ const SignIn = () => {
         <>
             <Navbar></Navbar>
             <div style={styles.container}>
+                {auth ?
+                    (
+                        <h1>
+                            Sign In
+                        </h1>
+                    )
+                    :
+                    (
+                        <h1>
+                            Create an account
+                        </h1>
+                    )
+                }
+
                 {error && <p style={styles.error}>{error}</p>}
 
                 <div style={styles.inputContainer}>
@@ -117,11 +152,11 @@ const SignIn = () => {
 
 const styles = {
     container: {
-        padding: '20px',
-        backgroundColor: '#f4f4f9',
-        border: '1px solid #ccc',
+        padding: '40px',
+        // backgroundColor: '#f4f4f9',
+        // border: '1px solid #ccc',
         borderRadius: '5px',
-        marginTop: '20px',
+        marginTop: '40px',
         margin: 'auto',
         height: '100%'
     },

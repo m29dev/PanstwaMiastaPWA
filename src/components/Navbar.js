@@ -26,6 +26,10 @@ const Navbar = () => {
 
     const [isUser, setIsUser] = useState(false)
 
+    const handleSignIn = async () => {
+        navigate('/auth')
+    }
+
     const handleUserCheck = async () => {
         try {
             const res = await getUserInfo()
@@ -47,12 +51,25 @@ const Navbar = () => {
 
     return (
         <nav style={styles.navbar}>
+            {/* BTN BACK */}
             {currentPath === '/' ? (
                 <div style={styles.flexBox}></div>
             ) : (
-                <FaRegArrowAltCircleLeft style={styles.backButton} onClick={handleGoBack} />
+                <div style={styles.btnBoxLeft}>
+                    <FaRegArrowAltCircleLeft style={styles.backButton} onClick={handleGoBack} />
+                </div>
             )}
 
+            {/* APP ICON IMG */}
+            <img
+                src="./icon.png" // Placeholder for account icon
+                alt="APP Icon"
+                style={styles.iconImg}
+            >
+
+            </img>
+
+            {/* USER ICON IMG / SIGN IN BTN */}
             {isUser ? (<div style={styles.accountIcon}>
                 <img
                     src="https://via.placeholder.com/30" // Placeholder for account icon
@@ -60,13 +77,53 @@ const Navbar = () => {
                     style={styles.icon}
                     onClick={handleUserPage}
                 />
-            </div>) : (<div style={styles.flexBox}></div>)}
+            </div>)
+                : (
+                    <div style={styles.btnBoxRight}>
+                        <button style={styles.button} onClick={handleSignIn}>Sign In</button>
+                    </div>
+                )}
 
         </nav>
     );
 };
 
 const styles = {
+
+    btnBoxRight: {
+        flex: 1,
+        display: 'flex',
+        justifyContent: 'end',
+    },
+
+    btnBoxLeft: {
+        flex: 1,
+        display: 'flex',
+        justifyContent: 'start',
+    },
+
+    button: {
+        // width: '35px',
+        height: '35px',
+        // padding: '0.75em 1.5em',
+        fontSize: '1em',
+        color: '#000000',
+        backgroundColor: '#EEEEEE',
+        border: 'none',
+        borderRadius: '25px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
+    },
+
+    iconImg: {
+        height: '80px',
+        width: '80px',
+        marginTop: '23px',
+        // webkitBoxShadow: '8px 8px 24px 0px rgba(66, 68, 90, 1)',
+        // mozBoxShadow: ' 8px 8px 24px 0px rgba(66, 68, 90, 1)',
+        // boxShadow: '8px 8px 24px 0px rgba(66, 68, 90, 1)',
+    },
+
     flexBox: {
         flex: 1
     },
@@ -78,7 +135,15 @@ const styles = {
         backgroundColor: '#007BFF',
         color: '#fff',
         height: '40px',
-        borderRadius: '0px 0px 25px 25px'
+        borderRadius: '0px 0px 35px 35px',
+
+        WebkitBoxShadow: '0px 8px 24px 0px rgba(40, 68, 90, 1)',
+        MozBoxShadow: '0px 8px 24px 0px rgba(40, 68, 90, 1)',
+        boxShadow: '0px 8px 24px 0px rgba(40, 68, 90, 1)',
+
+        // webkitBoxShadow: '0px 8px 24px 0px rgba(218, 218, 218, 1)',
+        // mozBoxShadow: '0px 8px 24px 0px rgba(218, 218, 218, 1)',
+        // boxShadow: '0px 8px 24px 0px rgba(218, 218, 218, 1)',
     },
     backButton: {
         // padding: '8px 16px',
