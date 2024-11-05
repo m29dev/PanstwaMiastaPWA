@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import supabase from "../supabaseClient"
-import { getUserInfo } from '../services/authService';
-
+import React, { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
+import supabase from '../supabaseClient'
+import { getUserInfo } from '../services/authService'
 
 const RoomsIdPage = () => {
     const navigate = useNavigate()
@@ -27,8 +26,10 @@ const RoomsIdPage = () => {
             if (!game) return
 
             // check if already a player
-            if (game?.player0?.id === user.id) return console.log('player0 rejoined')
-            if (game?.player1?.id === user.id) return console.log('player1 rejoined')
+            if (game?.player0?.id === user.id)
+                return console.log('player0 rejoined')
+            if (game?.player1?.id === user.id)
+                return console.log('player1 rejoined')
 
             // check if can join as a new player
             if (game.player1) return console.log('room already full')
@@ -45,8 +46,8 @@ const RoomsIdPage = () => {
                 .from('rooms')
                 .update([
                     {
-                        player1: playerObject
-                    }
+                        player1: playerObject,
+                    },
                 ])
                 .eq('id', id)
                 .select()
@@ -64,10 +65,7 @@ const RoomsIdPage = () => {
 
             const user = await getUserInfo()
 
-            const data = await supabase
-                .from('rooms')
-                .select()
-                .eq('id', id)
+            const data = await supabase.from('rooms').select().eq('id', id)
 
             const game = data.data[0]
 
@@ -130,23 +128,19 @@ const RoomsIdPage = () => {
         } catch (err) {
             console.log(err)
         }
-
     }
 
     const getGameInfo = async () => {
         try {
             console.log('fething game info')
 
-            const data = await supabase
-                .from('rooms')
-                .select()
-                .eq('id', id)
+            const data = await supabase.from('rooms').select().eq('id', id)
 
             const dataGame = data.data[0]
             setGame(dataGame)
 
             // check if there is already a game
-            if (dataGame.started) return navigate(`game/${dataGame.started}`)
+            if (dataGame.started) return navigate(`game`)
 
             // check if ready
             if (dataGame?.player0?.ready && dataGame?.player1?.ready) {
@@ -167,12 +161,6 @@ const RoomsIdPage = () => {
         }
     }
 
-    useEffect(() => {
-        getUser()
-        getGameInfo()
-        joinGame()
-    }, [])
-
     const gameUpdate = () => {
         console.log('101 UPDATE')
         getGameInfo()
@@ -181,8 +169,33 @@ const RoomsIdPage = () => {
     // Listen to inserts
     supabase
         .channel('rooms')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${id}` }, gameUpdate)
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'rooms',
+                filter: `id=eq.${id}`,
+            },
+            gameUpdate
+        )
         .subscribe()
+
+    const handleProtectedRoute = async () => {
+        try {
+            const user = await getUserInfo()
+            if (!user) return navigate('/auth')
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        handleProtectedRoute()
+        getUser()
+        getGameInfo()
+        joinGame()
+    }, [])
 
     return (
         <>
@@ -195,37 +208,41 @@ const RoomsIdPage = () => {
 
             <div style={styles.pageContainer}>
                 {/* Player 1 Card */}
-                {game.player0 ?
-                    (
-                        <div style={styles.playerCard}>
-                            <img
-                                src="https://via.placeholder.com/30" // Placeholder for account icon
-                                alt="Account Icon"
-                                style={styles.imgIcon}
-                            />
+                {game.player0 ? (
+                    <div style={styles.playerCard}>
+                        <img
+                            src="https://via.placeholder.com/30" // Placeholder for account icon
+                            alt="Account Icon"
+                            style={styles.imgIcon}
+                        />
 
-                            <h2 style={styles.playerName}>{game?.player0?.name}</h2>
+                        <h2 style={styles.playerName}>{game?.player0?.name}</h2>
 
-                            {game?.player0?.id === user?.id && !game?.player0?.ready && (
-                                <button style={styles.readyBtn} onClick={handlePlayerReady}>Ready</button>
+                        {game?.player0?.id === user?.id &&
+                            !game?.player0?.ready && (
+                                <button
+                                    style={styles.readyBtn}
+                                    onClick={handlePlayerReady}
+                                >
+                                    Ready
+                                </button>
                             )}
-                        </div>
-                    )
-                    :
-                    (
-                        <div style={styles.playerCard}>
-                            <h2 style={styles.playerName}>Waiting for a player to join</h2>
-                        </div>
-                    )
-                }
+                    </div>
+                ) : (
+                    <div style={styles.playerCard}>
+                        <h2 style={styles.playerName}>
+                            Waiting for a player to join
+                        </h2>
+                    </div>
+                )}
 
                 <div>
                     <h1 style={styles.vsText}>VS</h1>
                 </div>
 
                 {/* Player 2 Card */}
-                {game.player1 ?
-                    (<div style={styles.playerCard}>
+                {game.player1 ? (
+                    <div style={styles.playerCard}>
                         <img
                             src="https://via.placeholder.com/30" // Placeholder for account icon
                             alt="Account Icon"
@@ -234,15 +251,23 @@ const RoomsIdPage = () => {
 
                         <h2 style={styles.playerName}>{game?.player1?.name}</h2>
 
-                        {game?.player1?.id === user?.id && !game?.player1?.ready && (
-                            <button style={styles.readyBtn} onClick={handlePlayerReady}>Ready</button>
-                        )}
-                    </div>)
-                    :
-                    (<div style={styles.playerCard}>
-                        <h2 style={styles.playerName}>Waiting for a player to join</h2>
-                    </div>)}
-
+                        {game?.player1?.id === user?.id &&
+                            !game?.player1?.ready && (
+                                <button
+                                    style={styles.readyBtn}
+                                    onClick={handlePlayerReady}
+                                >
+                                    Ready
+                                </button>
+                            )}
+                    </div>
+                ) : (
+                    <div style={styles.playerCard}>
+                        <h2 style={styles.playerName}>
+                            Waiting for a player to join
+                        </h2>
+                    </div>
+                )}
             </div>
         </>
     )
@@ -252,11 +277,11 @@ const styles = {
     imgIcon: {
         height: '100px',
         width: '100px',
-        borderRadius: '50%'
+        borderRadius: '50%',
     },
 
     vsText: {
-        margin: 0
+        margin: 0,
     },
 
     pageContainer: {
@@ -267,7 +292,7 @@ const styles = {
         // padding: '20px',
         // backgroundColor: '#f4f4f8',
         height: 'calc(100vh - 60px)',
-        maxHeight: 'calc(100vh - 60px)'
+        maxHeight: 'calc(100vh - 60px)',
     },
 
     playerCard: {
@@ -282,7 +307,7 @@ const styles = {
         textAlign: 'center',
         flex: 1,
         margin: '30px',
-        position: 'relative'
+        position: 'relative',
     },
 
     readyBtn: {
@@ -291,7 +316,7 @@ const styles = {
         bottom: '10px',
         width: '60px',
         height: '40px',
-        borderRadius: '25px'
+        borderRadius: '25px',
     },
 
     playerName: {
@@ -304,6 +329,6 @@ const styles = {
         fontSize: '1.2rem',
         color: '#333',
     },
-};
+}
 
 export default RoomsIdPage

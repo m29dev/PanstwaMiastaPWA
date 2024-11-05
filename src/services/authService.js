@@ -1,9 +1,12 @@
-import supabase from "../supabaseClient"
+import supabase from '../supabaseClient'
 
 export const getUserInfo = async () => {
     try {
         const data = localStorage.getItem('userInfo')
         const user = JSON.parse(data)
+
+        if (!user) return false
+
         return user
     } catch (err) {
         console.log(err)
@@ -22,7 +25,7 @@ export const getUserData = async (id) => {
 
         const userObject = {
             id: dataUser.data.id,
-            name: dataUser.data.name
+            name: dataUser.data.name,
         }
 
         return userObject
@@ -53,17 +56,16 @@ export const signUp = async (name, password) => {
 
         if (!dataUser) return alert('error, please try again')
 
-        console.log("Successful SignUp: ", dataUser.data)
+        console.log('Successful SignUp: ', dataUser.data)
 
         const userObject = {
             id: dataUser.data[0].id,
-            name: dataUser.data[0].name
+            name: dataUser.data[0].name,
         }
 
         localStorage.setItem('userInfo', JSON.stringify(userObject))
         return true
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err)
     }
 }
@@ -79,28 +81,29 @@ export const signIn = async (name, password) => {
         console.log(1, dataUser)
 
         if (!dataUser) return { error: 'wrong username or password' }
-        if (dataUser.data.length < 1) return { error: 'wrong username or password' }
-        if (dataUser.data[0].password !== password) return { error: 'wrong username or password' }
+        if (dataUser.data.length < 1)
+            return { error: 'wrong username or password' }
+        if (dataUser.data[0].password !== password)
+            return { error: 'wrong username or password' }
 
-        console.log("Successful SignIn: ", dataUser)
+        console.log('Successful SignIn: ', dataUser)
 
         const userObject = {
             id: dataUser.data[0].id,
-            name: dataUser.data[0].name
+            name: dataUser.data[0].name,
         }
 
         localStorage.setItem('userInfo', JSON.stringify(userObject))
         return dataUser
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err)
     }
 }
 
 export const signOut = async () => {
     try {
-        localStorage.removeItem('userInfo');
-        alert(`You've Log Out`);
+        localStorage.removeItem('userInfo')
+        alert(`You've Log Out`)
     } catch (err) {
         console.log(err)
     }

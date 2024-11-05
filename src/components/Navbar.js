@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { getUserInfo } from '../services/authService';
-import { FaRegArrowAltCircleLeft } from "react-icons/fa";
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { getUserInfo } from '../services/authService'
+import { FaRegArrowAltCircleLeft } from 'react-icons/fa'
 
 const Navbar = () => {
     const navigate = useNavigate()
@@ -11,18 +11,16 @@ const Navbar = () => {
 
     const handleGoBack = () => {
         // if in game navigate to rooms
-        navigate(-1); // Navigate back to the previous page
-    };
+        navigate(-1) // Navigate back to the previous page
+    }
 
     const handleUserPage = async () => {
         const user = await getUserInfo()
 
         console.log(9, user)
 
-        if (user)
-            navigate(`/user/${user.id}`)
+        if (user) navigate(`/user/${user.id}`)
     }
-
 
     const [isUser, setIsUser] = useState(false)
 
@@ -43,11 +41,8 @@ const Navbar = () => {
     }
 
     useEffect(() => {
-        console.log(location)
-        setCurrentPath(location.pathname)
-
         handleUserCheck()
-    }, [location])
+    }, [])
 
     return (
         <nav style={styles.navbar}>
@@ -56,40 +51,42 @@ const Navbar = () => {
                 <div style={styles.flexBox}></div>
             ) : (
                 <div style={styles.btnBoxLeft}>
-                    <FaRegArrowAltCircleLeft style={styles.backButton} onClick={handleGoBack} />
+                    <FaRegArrowAltCircleLeft
+                        style={styles.backButton}
+                        onClick={handleGoBack}
+                    />
                 </div>
             )}
 
             {/* APP ICON IMG */}
             <img
-                src="./icon.png" // Placeholder for account icon
+                src="https://xegmsphprxsopaotcvpj.supabase.co/storage/v1/object/public/icons/icon.png.png" // Placeholder for account icon
                 alt="APP Icon"
                 style={styles.iconImg}
-            >
-
-            </img>
+            ></img>
 
             {/* USER ICON IMG / SIGN IN BTN */}
-            {isUser ? (<div style={styles.accountIcon}>
-                <img
-                    src="https://via.placeholder.com/30" // Placeholder for account icon
-                    alt="Account Icon"
-                    style={styles.icon}
-                    onClick={handleUserPage}
-                />
-            </div>)
-                : (
-                    <div style={styles.btnBoxRight}>
-                        <button style={styles.button} onClick={handleSignIn}>Sign In</button>
-                    </div>
-                )}
-
+            {isUser ? (
+                <div style={styles.btnBoxRight}>
+                    <img
+                        src="https://via.placeholder.com/30" // Placeholder for account icon
+                        alt="Account Icon"
+                        style={styles.icon}
+                        onClick={handleUserPage}
+                    />
+                </div>
+            ) : (
+                <div style={styles.btnBoxRight}>
+                    <button style={styles.button} onClick={handleSignIn}>
+                        Sign In
+                    </button>
+                </div>
+            )}
         </nav>
-    );
-};
+    )
+}
 
 const styles = {
-
     btnBoxRight: {
         flex: 1,
         display: 'flex',
@@ -125,7 +122,7 @@ const styles = {
     },
 
     flexBox: {
-        flex: 1
+        flex: 1,
     },
     navbar: {
         display: 'flex',
@@ -155,7 +152,7 @@ const styles = {
         cursor: 'pointer',
         // transition: 'background-color 0.3s',
         height: '30px',
-        width: '30px'
+        width: '30px',
     },
     accountIcon: {
         cursor: 'pointer',

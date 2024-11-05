@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import supabase from "../supabaseClient"
-import { useParams } from 'react-router-dom';
-import { getUserInfo } from '../services/authService';
-import { fetchGameInfo, getGameInfo, restartGame, updateGameInfo, updateGameInfoReview } from '../services/gameService';
-import Navbar from '../components/Navbar';
-import NavbarGame from '../components/NavbarGame';
+import supabase from '../supabaseClient'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getUserInfo } from '../services/authService'
+import {
+    fetchGameInfo,
+    getGameInfo,
+    restartGame,
+    updateGameInfo,
+    updateGameInfoReview,
+} from '../services/gameService'
+import Navbar from '../components/Navbar'
+import NavbarGame from '../components/NavbarGame'
 
 const GamePage = () => {
+    const navigate = useNavigate()
+
     const { id } = useParams()
     const [panstwo, setPanstwo] = useState('')
     const [miasto, setMiasto] = useState('')
@@ -20,8 +28,6 @@ const GamePage = () => {
 
     const [userInfo, setUserInfo] = useState('')
     const [gameInfo, setGameInfo] = useState('')
-    const [displayData, setDisplayData] = useState({})
-    const [check, setCheck] = useState(false)
     const [gameStatus, setGameStatus] = useState(true)
 
     const handleNewGame = async () => {
@@ -39,7 +45,11 @@ const GamePage = () => {
     // Simple function to log any messages we receive
     const messageReceived = async (payload) => {
         console.log(payload)
-        const res = await updateGameInfo(id, { panstwo, miasto, imie, marka }, true)
+        const res = await updateGameInfo(
+            id,
+            { panstwo, miasto, imie, marka },
+            true
+        )
 
         // clean
         setPanstwo('')
@@ -54,10 +64,8 @@ const GamePage = () => {
     const channel = supabase.channel(`room${id}`)
 
     channel
-        .on(
-            'broadcast',
-            { event: 'onSendAnswers' },
-            (payload) => messageReceived(payload)
+        .on('broadcast', { event: 'onSendAnswers' }, (payload) =>
+            messageReceived(payload)
         )
         .subscribe()
 
@@ -80,7 +88,10 @@ const GamePage = () => {
     const handleSubmit = async () => {
         console.log('submit')
         const ansObject = {
-            panstwo, miasto, imie, marka
+            panstwo,
+            miasto,
+            imie,
+            marka,
         }
 
         const res = await updateGameInfo(id, ansObject, false)
@@ -90,7 +101,9 @@ const GamePage = () => {
         channel.send({
             type: 'broadcast',
             event: 'onSendAnswers',
-            payload: { message: `${userInfo.name} has sent data. Init same for current player` },
+            payload: {
+                message: `${userInfo.name} has sent data. Init same for current player`,
+            },
         })
 
         // clean
@@ -113,7 +126,7 @@ const GamePage = () => {
 
         const res = await updateGameInfoReview(id, points)
         console.log(res)
-        // 
+        //
     }
 
     const onGameUpdate = async () => {
@@ -128,26 +141,46 @@ const GamePage = () => {
     // Listen to inserts
     supabase
         .channel('rooms')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${id}` }, onGameUpdate)
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'rooms',
+                filter: `id=eq.${id}`,
+            },
+            onGameUpdate
+        )
         .subscribe()
 
+    const handleProtectedRoute = async () => {
+        try {
+            const user = await getUserInfo()
+            if (!user) return navigate('/auth')
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
+        handleProtectedRoute()
         onGameInit()
         onGameUpdate()
     }, [])
 
     return (
         <>
-            <NavbarGame></NavbarGame>
+            <Navbar></Navbar>
 
             {gameStatus && (
                 <>
                     <div>
-                        PTS: {gameInfo?.player0?.id === userInfo?.id ? gameInfo?.player0?.points : gameInfo?.player1?.points}
+                        PTS:{' '}
+                        {gameInfo?.player0?.id === userInfo?.id
+                            ? gameInfo?.player0?.points
+                            : gameInfo?.player1?.points}
                     </div>
-                    <div>
-                        ROUND: {gameInfo?.round}/3
-                    </div>
+                    <div>ROUND: {gameInfo?.round}/3</div>
 
                     {!gameInfo?.review && (
                         <div style={styles.container}>
@@ -200,10 +233,13 @@ const GamePage = () => {
                             </div>
 
                             <div style={styles.btnBox}>
-                                <button type="submit" onClick={handleSubmit} style={styles.button}>
+                                <button
+                                    type="submit"
+                                    onClick={handleSubmit}
+                                    style={styles.button}
+                                >
                                     CZAS STOP
                                 </button>
-
                             </div>
                         </div>
                     )}
@@ -213,77 +249,77 @@ const GamePage = () => {
                             {/* panstwo */}
                             <div style={styles.inputContainer}>
                                 <label style={styles.label}>Panstwo:</label>
-                                <p>{
-                                    gameInfo?.player0?.id === userInfo?.id
-                                        ?
-                                        gameInfo?.player1?.answers?.panstwo
-                                        :
-                                        gameInfo?.player0?.answers?.panstwo
-                                }
+                                <p>
+                                    {gameInfo?.player0?.id === userInfo?.id
+                                        ? gameInfo?.player1?.answers?.panstwo
+                                        : gameInfo?.player0?.answers?.panstwo}
                                 </p>
                                 <input
                                     type="checkbox"
                                     checked={panstwoBox}
-                                    onChange={() => setPanstwoBox((state) => !state)}
+                                    onChange={() =>
+                                        setPanstwoBox((state) => !state)
+                                    }
                                 />
                             </div>
 
                             {/* miasto */}
                             <div style={styles.inputContainer}>
                                 <label style={styles.label}>Miasto:</label>
-                                <p>{
-                                    gameInfo?.player0?.id === userInfo?.id
-                                        ?
-                                        gameInfo?.player1?.answers?.miasto
-                                        :
-                                        gameInfo?.player0?.answers?.miasto
-                                }
+                                <p>
+                                    {gameInfo?.player0?.id === userInfo?.id
+                                        ? gameInfo?.player1?.answers?.miasto
+                                        : gameInfo?.player0?.answers?.miasto}
                                 </p>
                                 <input
                                     type="checkbox"
                                     checked={miastoBox}
-                                    onChange={() => setMiastoBox((state) => !state)}
+                                    onChange={() =>
+                                        setMiastoBox((state) => !state)
+                                    }
                                 />
                             </div>
 
                             {/* imie */}
                             <div style={styles.inputContainer}>
                                 <label style={styles.label}>Imie:</label>
-                                <p>{
-                                    gameInfo?.player0?.id === userInfo?.id
-                                        ?
-                                        gameInfo?.player1?.answers?.imie
-                                        :
-                                        gameInfo?.player0?.answers?.imie
-                                }
+                                <p>
+                                    {gameInfo?.player0?.id === userInfo?.id
+                                        ? gameInfo?.player1?.answers?.imie
+                                        : gameInfo?.player0?.answers?.imie}
                                 </p>
                                 <input
                                     type="checkbox"
                                     checked={imieBox}
-                                    onChange={() => setImieBox((state) => !state)}
+                                    onChange={() =>
+                                        setImieBox((state) => !state)
+                                    }
                                 />
                             </div>
 
                             {/* marka */}
                             <div style={styles.inputContainer}>
                                 <label style={styles.label}>Marka:</label>
-                                <p>{
-                                    gameInfo?.player0?.id === userInfo?.id
-                                        ?
-                                        gameInfo?.player1?.answers?.marka
-                                        :
-                                        gameInfo?.player0?.answers?.marka
-                                }
+                                <p>
+                                    {gameInfo?.player0?.id === userInfo?.id
+                                        ? gameInfo?.player1?.answers?.marka
+                                        : gameInfo?.player0?.answers?.marka}
                                 </p>
                                 <input
                                     type="checkbox"
                                     checked={markaBox}
-                                    onChange={() => setMarkaBox((state) => !state)}
+                                    onChange={() =>
+                                        setMarkaBox((state) => !state)
+                                    }
                                 />
                             </div>
 
                             <div style={styles.btnBox}>
-                                <button type="submit" onClick={handleSubmitReview} style={styles.button}>
+                                <button
+                                    type="submit"
+                                    onClick={handleSubmitReview}
+                                    style={styles.button}
+                                >
                                     WYŚLIJ OCENE
                                 </button>
                             </div>
@@ -292,24 +328,27 @@ const GamePage = () => {
                 </>
             )}
 
-
-
-
             {!gameStatus && (
                 <div>
                     <h3> Game Over!</h3>
 
                     <h1>
-                        Player {gameInfo.player0.points > gameInfo.player1.points ? gameInfo.player0.name : gameInfo.player1.name} won!
+                        Player{' '}
+                        {gameInfo.player0.points > gameInfo.player1.points
+                            ? gameInfo.player0.name
+                            : gameInfo.player1.name}{' '}
+                        won!
                     </h1>
 
-
-                    <p>Score: {gameInfo.player0.name}, {gameInfo.player0.points} pts : {gameInfo.player1.name}, {gameInfo.player1.points} pts</p>
+                    <p>
+                        Score: {gameInfo.player0.name},{' '}
+                        {gameInfo.player0.points} pts : {gameInfo.player1.name},{' '}
+                        {gameInfo.player1.points} pts
+                    </p>
 
                     <button onClick={handleNewGame}>New Game</button>
                 </div>
             )}
-
         </>
     )
 }
@@ -322,7 +361,7 @@ const styles = {
         borderRadius: '5px',
         marginTop: '20px',
         margin: 'auto',
-        height: '100%'
+        height: '100%',
     },
     inputContainer: {
         marginBottom: '15px',
@@ -339,7 +378,7 @@ const styles = {
     },
     btnBox: {
         display: 'flex',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
     },
     button: {
         padding: '10px 15px',
@@ -362,6 +401,6 @@ const styles = {
     error: {
         color: 'red',
     },
-};
+}
 
 export default GamePage

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react'
 import supabase from '../supabaseClient'
-import { useNavigate } from 'react-router-dom';
-import Navbar from "../components/Navbar";
-import CardBox from "../components/CardBox";
-import { getUserInfo } from "../services/authService";
-import { MdKeyboardArrowRight } from "react-icons/md";
+import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
+import CardBox from '../components/CardBox'
+import { getUserInfo } from '../services/authService'
+import { MdKeyboardArrowRight } from 'react-icons/md'
 
 function RoomsPage() {
     const navigate = useNavigate()
@@ -13,7 +13,8 @@ function RoomsPage() {
 
     const handleCreateRoom = async () => {
         try {
-            if (name.length < 3) return alert('room name must contain at least 3 characters')
+            if (name.length < 3)
+                return alert('room name must contain at least 3 characters')
 
             const user = await getUserInfo()
 
@@ -27,16 +28,13 @@ function RoomsPage() {
 
             const dataRoom = await supabase
                 .from('rooms')
-                .insert([
-                    { name: name, player0: playerObject }
-                ])
+                .insert([{ name: name, player0: playerObject }])
                 .select()
 
             if (!dataRoom) return alert('error, could not create a room')
 
             console.log(23, dataRoom.data[0])
             navigate(`/rooms/${dataRoom.data[0].id}`)
-
         } catch (err) {
             console.log(err)
         }
@@ -51,10 +49,24 @@ function RoomsPage() {
     // Listen to inserts
     supabase
         .channel('rooms')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rooms' }, getRooms)
+        .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'rooms' },
+            getRooms
+        )
         .subscribe()
 
+    const handleProtectedRoute = async () => {
+        try {
+            const user = await getUserInfo()
+            if (!user) return navigate('/auth')
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
+        handleProtectedRoute()
         getRooms()
     }, [])
 
@@ -71,29 +83,25 @@ function RoomsPage() {
                         placeholder="Create new game..."
                         style={styles.roundedInput}
                         required
-
                     />
-                    <button type="submit" style={styles.submitButton} onClick={handleCreateRoom}>
+                    <button
+                        type="submit"
+                        style={styles.submitButton}
+                        onClick={handleCreateRoom}
+                    >
                         <MdKeyboardArrowRight style={styles.iconBox} />
                     </button>
                 </div>
 
-
                 {rooms.map((room, index) => (
-                    <CardBox
-                        key={index}
-                        title={room.name}
-                        id={room.id}
-                    />
+                    <CardBox key={index} title={room.name} id={room.id} />
                 ))}
             </div>
         </>
-
     )
 }
 
 const styles = {
-
     iBox: {
         display: 'flex',
         flexDirection: 'row',
@@ -107,7 +115,7 @@ const styles = {
         margin: 'auto',
         marginBottom: '30px',
         flex: 1,
-        width: '100%'
+        width: '100%',
     },
 
     roundedInput: {
@@ -115,14 +123,14 @@ const styles = {
         outline: 'none',
         flexGrow: 1,
         padding: '10px 10px',
-        borderRadius: '25px 0 0 25px', /* Rounded on the left */
+        borderRadius: '25px 0 0 25px' /* Rounded on the left */,
     },
 
     submitButton: {
-        backgroundColor: '#007bff', /* Button color */
+        backgroundColor: '#007bff' /* Button color */,
         color: 'white',
         border: 'none',
-        borderRadius: '25px', /* Rounded on the right */
+        borderRadius: '25px' /* Rounded on the right */,
         // padding: '5px 15px',
         height: '35px',
         width: '40px',
@@ -134,7 +142,7 @@ const styles = {
 
     iconBox: {
         height: '30px',
-        width: '30px'
+        width: '30px',
     },
 
     container: {
@@ -179,7 +187,7 @@ const styles = {
     inputContainer: {
         marginBottom: '15px',
         width: '80%',
-        margin: 'auto'
+        margin: 'auto',
     },
     label: {
         display: 'block',
@@ -193,7 +201,7 @@ const styles = {
     },
     btnBox: {
         display: 'flex',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
     },
 }
 

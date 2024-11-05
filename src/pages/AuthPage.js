@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
+import React, { useEffect, useState } from 'react'
+import Navbar from '../components/Navbar'
 import { getUserInfo, signIn, signUp } from '../services/authService'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 
 const SignIn = () => {
     const navigate = useNavigate()
@@ -15,7 +15,7 @@ const SignIn = () => {
         try {
             console.log('CHECKING FOR USER INFO...')
             const userInfo = await getUserInfo()
-            console.log(userInfo)
+            console.log(18, userInfo)
 
             if (!userInfo) return
 
@@ -30,7 +30,7 @@ const SignIn = () => {
     }, [])
 
     const switchAuth = () => {
-        setAuth(state => !state)
+        setAuth((state) => !state)
 
         // Reset fields
         setName('')
@@ -84,19 +84,7 @@ const SignIn = () => {
         <>
             <Navbar></Navbar>
             <div style={styles.container}>
-                {auth ?
-                    (
-                        <h1>
-                            Sign In
-                        </h1>
-                    )
-                    :
-                    (
-                        <h1>
-                            Create an account
-                        </h1>
-                    )
-                }
+                {auth ? <h1>Sign In</h1> : <h1>Create an account</h1>}
 
                 {error && <p style={styles.error}>{error}</p>}
 
@@ -123,11 +111,18 @@ const SignIn = () => {
 
                 {auth && (
                     <div style={styles.btnBox}>
-                        <button type="submit" onClick={handleSubmit} style={styles.button}>
+                        <button
+                            type="submit"
+                            onClick={handleSubmit}
+                            style={styles.button}
+                        >
                             Sign In
                         </button>
 
-                        <button onClick={switchAuth} style={styles.buttonSecond}>
+                        <button
+                            onClick={switchAuth}
+                            style={styles.buttonSecond}
+                        >
                             Don't have an account yet?
                         </button>
                     </div>
@@ -135,20 +130,26 @@ const SignIn = () => {
 
                 {!auth && (
                     <div style={styles.btnBox}>
-                        <button type="submit" onClick={handleSubmit} style={styles.button}>
+                        <button
+                            type="submit"
+                            onClick={handleSubmit}
+                            style={styles.button}
+                        >
                             Sign Up
                         </button>
 
-                        <button onClick={switchAuth} style={styles.buttonSecond}>
+                        <button
+                            onClick={switchAuth}
+                            style={styles.buttonSecond}
+                        >
                             have an account already?
                         </button>
                     </div>
                 )}
-
             </div>
         </>
-    );
-};
+    )
+}
 
 const styles = {
     container: {
@@ -158,7 +159,7 @@ const styles = {
         borderRadius: '5px',
         marginTop: '40px',
         margin: 'auto',
-        height: '100%'
+        height: '100%',
     },
     inputContainer: {
         marginBottom: '15px',
@@ -175,7 +176,7 @@ const styles = {
     },
     btnBox: {
         display: 'flex',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
     },
     button: {
         padding: '10px 15px',
@@ -198,6 +199,6 @@ const styles = {
     error: {
         color: 'red',
     },
-};
+}
 
-export default SignIn;
+export default SignIn

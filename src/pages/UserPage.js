@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
-import { getUserData, signOut } from '../services/authService'
+import { getUserData, getUserInfo, signOut } from '../services/authService'
 import { useNavigate, useParams } from 'react-router-dom'
 
 const UserPage = () => {
@@ -27,7 +27,17 @@ const UserPage = () => {
         }
     }
 
+    const handleProtectedRoute = async () => {
+        try {
+            const user = await getUserInfo()
+            if (!user) return navigate('/auth')
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
+        handleProtectedRoute()
         handleRenderUser()
     }, [])
 
