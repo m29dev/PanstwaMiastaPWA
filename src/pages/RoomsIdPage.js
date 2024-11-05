@@ -118,7 +118,7 @@ const RoomsIdPage = () => {
         try {
             const update = await supabase
                 .from('rooms')
-                .update([{ started: true, round: 1 }])
+                .update([{ started: 1, round: 1 }])
                 .eq('id', id)
                 .select()
 

@@ -76,8 +76,11 @@ const GamePage = () => {
 
             const game = await fetchGameInfo(id)
 
-            // ADD LATER
-            // if (!game.started) return setGameStatus(false)
+            // game.started === 0 => before the game
+            // game.started === 1 => game started
+            // game.started === 2 => game ended
+
+            if (game.started === 2) return setGameStatus(false)
 
             console.log(24, user)
         } catch (err) {

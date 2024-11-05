@@ -10,8 +10,17 @@ const Navbar = () => {
     const [currentPath, setCurrentPath] = useState(null)
 
     const handleGoBack = () => {
-        // if in game navigate to rooms
-        navigate(-1) // Navigate back to the previous page
+        const currLoc = location.pathname
+        const arr = currLoc.split('/')
+        arr.pop()
+        let newLocation = arr.join('/')
+
+        console.log(arr)
+
+        if (currLoc.slice(-4) === 'game') return navigate('/rooms')
+        if (arr?.[1] === 'user') return navigate('/')
+        if (newLocation === '') return navigate('/')
+        return navigate(newLocation)
     }
 
     const handleUserPage = async () => {
@@ -22,7 +31,7 @@ const Navbar = () => {
         if (user) navigate(`/user/${user.id}`)
     }
 
-    const [isUser, setIsUser] = useState(false)
+    const [user, setUser] = useState(false)
 
     const handleSignIn = async () => {
         navigate('/auth')
@@ -31,10 +40,10 @@ const Navbar = () => {
     const handleUserCheck = async () => {
         try {
             const res = await getUserInfo()
-            console.log(30, res)
+            console.log(30, res.avatar)
 
-            if (!res) return setIsUser(false)
-            if (res) return setIsUser(true)
+            if (!res) return setUser(false)
+            if (res) setUser(res)
         } catch (err) {
             console.log(err)
         }
@@ -63,13 +72,14 @@ const Navbar = () => {
                 src="https://xegmsphprxsopaotcvpj.supabase.co/storage/v1/object/public/icons/icon.png.png" // Placeholder for account icon
                 alt="APP Icon"
                 style={styles.iconImg}
+                onClick={() => navigate('/')}
             ></img>
 
             {/* USER ICON IMG / SIGN IN BTN */}
-            {isUser ? (
+            {user ? (
                 <div style={styles.btnBoxRight}>
                     <img
-                        src="https://via.placeholder.com/30" // Placeholder for account icon
+                        src={`https://xegmsphprxsopaotcvpj.supabase.co/storage/v1/object/public/icons/${user?.avatar}`} // Placeholder for account icon
                         alt="Account Icon"
                         style={styles.icon}
                         onClick={handleUserPage}

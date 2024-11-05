@@ -1,5 +1,5 @@
-import supabase from "../supabaseClient"
-import { getUserInfo } from "./authService"
+import supabase from '../supabaseClient'
+import { getUserInfo } from './authService'
 
 export const getGameInfo = async () => {
     try {
@@ -14,10 +14,7 @@ export const getGameInfo = async () => {
 export const fetchGameInfo = async (id) => {
     try {
         // GAME
-        const gameData = await supabase
-            .from('rooms')
-            .select()
-            .eq('id', id)
+        const gameData = await supabase.from('rooms').select().eq('id', id)
 
         if (!gameData) return console.log('could not fetch game data')
         const game = gameData?.data?.[0]
@@ -29,7 +26,7 @@ export const fetchGameInfo = async (id) => {
             player0: game.player0,
             player1: game.player1,
             round: game.round,
-            review: game.review
+            review: game.review,
         }
 
         localStorage.setItem('gameInfo', JSON.stringify(gameObject))
@@ -90,20 +87,35 @@ export const updateGameInfoReview = async (id, points) => {
             game.player1.answers = null
             game.player1.points = +game.player1.points + +points
 
-            console.log("0: ", game.player0.answers, "1: ", game.player1.answers)
+            console.log(
+                '0: ',
+                game.player0.answers,
+                '1: ',
+                game.player1.answers
+            )
             let rev
-            if (game.player0.answers === null && game.player1.answers === null) {
+            if (
+                game.player0.answers === null &&
+                game.player1.answers === null
+            ) {
                 rev = false
                 game.round = game.round + 1
             }
 
             if (game.round > 3) {
-                game.started = false
+                game.started = 2
             }
 
             const gameData = await supabase
                 .from('rooms')
-                .update([{ player1: game.player1, review: rev, round: game.round, started: game.started }])
+                .update([
+                    {
+                        player1: game.player1,
+                        review: rev,
+                        round: game.round,
+                        started: game.started,
+                    },
+                ])
                 .eq('id', id)
                 .select()
 
@@ -117,9 +129,17 @@ export const updateGameInfoReview = async (id, points) => {
             game.player0.answers = null
             game.player0.points = +game.player0.points + +points
 
-            console.log("0: ", game.player0.answers, "1: ", game.player1.answers)
+            console.log(
+                '0: ',
+                game.player0.answers,
+                '1: ',
+                game.player1.answers
+            )
             let rev
-            if (game.player0.answers === null && game.player1.answers === null) {
+            if (
+                game.player0.answers === null &&
+                game.player1.answers === null
+            ) {
                 rev = false
                 game.round = game.round + 1
             }
@@ -130,7 +150,14 @@ export const updateGameInfoReview = async (id, points) => {
 
             const gameData = await supabase
                 .from('rooms')
-                .update([{ player0: game.player0, review: rev, round: game.round, started: game.started }])
+                .update([
+                    {
+                        player0: game.player0,
+                        review: rev,
+                        round: game.round,
+                        started: game.started,
+                    },
+                ])
                 .eq('id', id)
                 .select()
 
@@ -158,7 +185,15 @@ export const restartGame = async (id) => {
 
         const gameData = await supabase
             .from('rooms')
-            .update([{ player0: game.player0, player1: game.player1, review: game.review, round: game.round, started: game.started }])
+            .update([
+                {
+                    player0: game.player0,
+                    player1: game.player1,
+                    review: game.review,
+                    round: game.round,
+                    started: game.started,
+                },
+            ])
             .eq('id', id)
             .select()
 

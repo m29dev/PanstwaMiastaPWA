@@ -6,6 +6,7 @@ import RoomsPage from './pages/RoomsPage'
 import GamePage from './pages/GamePage'
 import UserPage from './pages/UserPage'
 import RoomsIdPage from './pages/RoomsIdPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 const App = () => {
     return (
@@ -17,6 +18,7 @@ const App = () => {
                 <Route path="/rooms/:id" element={<RoomsIdPage />} />
                 <Route path="/rooms/:id/game" element={<GamePage />} />
                 <Route path="/user/:id" element={<UserPage />} />
+                <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </Router>
     )

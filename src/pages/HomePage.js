@@ -1,42 +1,34 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
 
 const HomePage = () => {
     const navigate = useNavigate()
 
-    // Placeholder functions for button actions
-    const handleSignIn = () => {
-        navigate('/auth')
-        console.log("Sign In button clicked");
-        // Implement sign-in logic here, such as redirecting to a login page or showing a login form
-    };
-
     const handlePlay = () => {
         navigate('/rooms')
-        console.log("Play button clicked");
+        console.log('Play button clicked')
         // Implement play logic here, such as redirecting to the game or initializing it
-    };
+    }
 
     return (
         <>
             <Navbar></Navbar>
             <div style={styles.container}>
-
                 <h1 style={styles.title}>Panstwa Miasta</h1>
                 <p style={styles.description}>
-                    Welcome to the Panstwa Miasta game! Challenge your knowledge of countries, cities, and more.
+                    Welcome to the Panstwa Miasta game! Challenge your knowledge
+                    of countries, cities, and more.
                 </p>
                 <div style={styles.buttonContainer}>
-
                     <button style={styles.button} onClick={handlePlay}>
                         Play
                     </button>
                 </div>
             </div>
         </>
-    );
-};
+    )
+}
 
 const styles = {
     container: {
@@ -73,10 +65,10 @@ const styles = {
         cursor: 'pointer',
         transition: 'background-color 0.3s',
     },
-};
+}
 
 styles.button[':hover'] = {
     backgroundColor: '#0056b3',
-};
+}
 
-export default HomePage;
+export default HomePage

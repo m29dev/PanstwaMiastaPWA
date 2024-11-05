@@ -26,6 +26,7 @@ export const getUserData = async (id) => {
         const userObject = {
             id: dataUser.data.id,
             name: dataUser.data.name,
+            avatar: dataUser.data.avatar,
         }
 
         return userObject
@@ -34,7 +35,7 @@ export const getUserData = async (id) => {
     }
 }
 
-export const signUp = async (name, password) => {
+export const signUp = async (name, password, avatar) => {
     try {
         // check if name already exists
         const dataCheck = await supabase
@@ -48,7 +49,7 @@ export const signUp = async (name, password) => {
         const dataUser = await supabase
             .from('users') // Change 'users' to your table name
             .insert([
-                { name: name, password: password }, // Adjust object keys to match your table columns
+                { name: name, password: password, avatar: avatar }, // Adjust object keys to match your table columns
             ])
             .select()
 
@@ -91,6 +92,7 @@ export const signIn = async (name, password) => {
         const userObject = {
             id: dataUser.data[0].id,
             name: dataUser.data[0].name,
+            avatar: dataUser.data[0].avatar,
         }
 
         localStorage.setItem('userInfo', JSON.stringify(userObject))
