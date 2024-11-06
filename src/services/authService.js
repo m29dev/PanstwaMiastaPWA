@@ -62,6 +62,7 @@ export const signUp = async (name, password, avatar) => {
         const userObject = {
             id: dataUser.data[0].id,
             name: dataUser.data[0].name,
+            avatar: dataUser.data[0].avatar,
         }
 
         localStorage.setItem('userInfo', JSON.stringify(userObject))
@@ -97,6 +98,44 @@ export const signIn = async (name, password) => {
 
         localStorage.setItem('userInfo', JSON.stringify(userObject))
         return dataUser
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const userAvatarUpdate = async (avatar) => {
+    try {
+        const user = await getUserInfo()
+
+        if (!user.id) return console.log('user id is required')
+
+        const userData = await supabase
+            .from('users')
+            .update([
+                {
+                    avatar: avatar,
+                },
+            ])
+            .eq('id', user?.id)
+            .select()
+
+        if (!userData) return false
+        if (userData.error) return false
+
+        const updateUserInfo = await getUserData(user?.id)
+        if (!updateUserInfo) return false
+        if (updateUserInfo.error) return false
+
+        console.log(129, updateUserInfo)
+        const userObject = {
+            id: updateUserInfo.id,
+            name: updateUserInfo.name,
+            avatar: updateUserInfo.avatar,
+        }
+
+        localStorage.setItem('userInfo', JSON.stringify(userObject))
+
+        return updateUserInfo
     } catch (err) {
         console.log(err)
     }

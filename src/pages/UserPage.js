@@ -1,25 +1,33 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
-import { getUserData, getUserInfo, signOut } from '../services/authService'
+import {
+    getUserData,
+    getUserInfo,
+    signOut,
+    userAvatarUpdate,
+} from '../services/authService'
 import { useNavigate, useParams } from 'react-router-dom'
+import supabase from '../supabaseClient'
 
 const UserPage = () => {
     const navigate = useNavigate()
     const params = useParams()
     const [user, setUser] = useState([])
 
-    const handleSubmit = () => {
+    const handleSignOut = () => {
         signOut()
         navigate('/auth')
     }
 
     const [avatar, setAvatar] = useState()
+    const [avatarData, setAvatarData] = useState()
 
     const handleAvatarChange = (event) => {
+        console.log('AVATAR INFO: ', Date.now(), event.target.files[0])
+
+        setAvatarData(event.target.files[0])
         const objectUrl = URL.createObjectURL(event.target.files[0])
         setAvatar(objectUrl)
-
-        console.log(objectUrl)
     }
 
     const handleRenderUser = async () => {
@@ -36,9 +44,24 @@ const UserPage = () => {
         }
     }
 
-    const handleChangeAvatar = async () => {
+    const handleSave = async () => {
         try {
-            console.log('changing avatar')
+            // check if new image
+            console.log('saving the changes: ', avatar)
+
+            // Upload the image to Supabase Storage
+            const res = await supabase.storage
+                .from('icons') // 'images' is your storage bucket name
+                .upload(`${Date.now()}.${avatarData.name}`, avatarData)
+
+            if (!res) return console.log('upload error')
+            if (res?.error) return console.log(res?.error)
+
+            console.log('UPLOADED AVATAR: ', res?.data?.path)
+            // update userInfo
+            const update = await userAvatarUpdate(res?.data?.path)
+
+            if (update) handleRenderUser()
         } catch (err) {
             console.log(err)
         }
@@ -61,12 +84,13 @@ const UserPage = () => {
     return (
         <>
             <Navbar></Navbar>
+
             <div style={styles.container}>
                 <h1>id: {user.id}</h1>
                 <h1>user: {user.name}</h1>
 
-                <label for="upload">
-                    <div style={styles.avatarBox}>
+                <div style={styles.avatarBox}>
+                    <label for="upload">
                         <img
                             src={
                                 avatar
@@ -75,77 +99,85 @@ const UserPage = () => {
                             } // Placeholder for account icon
                             alt="Account Icon"
                             style={styles.icon}
-                            onClick={handleChangeAvatar}
                         />
-                    </div>
 
-                    <input
-                        accept="image/*"
-                        id="upload"
-                        type="file"
-                        capture="environment"
-                        style={styles.hidden}
-                        onChange={handleAvatarChange}
-                    />
-                </label>
+                        <input
+                            accept="image/*"
+                            id="upload"
+                            type="file"
+                            capture="environment"
+                            style={styles.hidden}
+                            onChange={handleAvatarChange}
+                        />
+                    </label>
+                </div>
+            </div>
 
-                <button
-                    type="submit"
-                    style={styles.button}
-                    onClick={handleSubmit}
-                >
-                    SignOut
-                </button>
+            <div style={styles.containerPanel}>
+                <div style={styles.controlPanel}>
+                    <button style={styles.buttonPanel} onClick={handleSave}>
+                        Save
+                    </button>
+                    <button style={styles.buttonPanel} onClick={handleSignOut}>
+                        Sign Out
+                    </button>
+                </div>
             </div>
         </>
     )
 }
 
 const styles = {
+    containerPanel: {
+        width: '100%',
+        height: '90px',
+        // padding: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'start',
+    },
+
+    controlPanel: {
+        width: '80%',
+        height: '50px',
+        borderRadius: '50px',
+        backgroundColor: '#047cfc',
+        display: 'flex',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+    },
+
+    buttonPanel: {
+        // width: '35px',
+        height: '35px',
+        // padding: '0.75em 1.5em',
+        fontSize: '1em',
+        backgroundColor: '#0471f1',
+        color: 'white',
+        border: 'none',
+        borderRadius: '25px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
+        flex: 1,
+        marginLeft: '10px',
+        marginRight: '10px',
+    },
+
     avatarBox: {
         height: '100px',
         width: '100px',
-    },
-
-    hidden: { display: 'none' },
-
-    iBox: {
-        display: 'flex',
-        flexDirection: 'row',
-
-        alignItems: 'center',
-        border: '2px solid #ccc',
-        borderRadius: '25px',
-        // padding: '5px',
-        // width: '300px',
-        overflow: 'hidden',
-        margin: 'auto',
-        marginBottom: '30px',
-        flex: 1,
-        width: '100%',
-    },
-
-    roundedInput: {
-        border: 'none',
-        outline: 'none',
-        flexGrow: 1,
-        padding: '10px 10px',
-        borderRadius: '25px 0 0 25px' /* Rounded on the left */,
-    },
-
-    submitButton: {
-        backgroundColor: '#007bff' /* Button color */,
-        color: 'white',
-        border: 'none',
-        borderRadius: '25px' /* Rounded on the right */,
-        // padding: '5px 15px',
-        height: '35px',
-        width: '40px',
-        cursor: 'pointer',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
     },
+
+    icon: {
+        height: '64px',
+        width: '64px',
+        borderRadius: '50%',
+    },
+
+    hidden: { display: 'none' },
 
     iconBox: {
         height: '30px',
@@ -158,27 +190,15 @@ const styles = {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'start',
-        minHeight: 'calc(100vh - 60px)',
+        // minHeight: 'calc(100vh - 60px)',
+        minHeight: 'calc(100vh - 150px - 60px)',
         height: '100%',
         // maxHeight: 'calc(100vh - 60px)',
         textAlign: 'center',
         // backgroundColor: '#f4f4f9',
         fontFamily: 'Arial, sans-serif',
         // overflowY: 'auto', // Enable vertical scroll
-    },
-    title: {
-        fontSize: '2.5em',
-        color: '#333',
-        marginBottom: '0.5em',
-    },
-    description: {
-        fontSize: '1.2em',
-        color: '#555',
-        marginBottom: '2em',
-    },
-    buttonContainer: {
-        display: 'flex',
-        gap: '1em',
+        flex: 1,
     },
     button: {
         padding: '0.75em 1.5em',
@@ -191,24 +211,9 @@ const styles = {
         transition: 'background-color 0.3s',
     },
 
-    inputContainer: {
-        marginBottom: '15px',
-        width: '80%',
-        margin: 'auto',
-    },
     label: {
         display: 'block',
         marginBottom: '5px',
-    },
-    input: {
-        width: '100%',
-        height: '30px',
-        borderRadius: '5px',
-        border: '1px solid #ccc',
-    },
-    btnBox: {
-        display: 'flex',
-        justifyContent: 'space-between',
     },
 }
 
