@@ -1,1 +1,1 @@
-https://staging.d1y23v5jxber48.amplifyapp.com/
+https://staging.d10xjwux1043jq.amplifyapp.com/
