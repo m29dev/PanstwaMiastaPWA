@@ -24,6 +24,7 @@ function RoomsPage() {
                 points: 0,
                 answers: null,
                 ready: false,
+                avatar: user?.avatar,
             }
 
             const dataRoom = await supabase

@@ -61,7 +61,9 @@ const UserPage = () => {
             // update userInfo
             const update = await userAvatarUpdate(res?.data?.path)
 
-            if (update) handleRenderUser()
+            if (!update) return alert('could not update data')
+            handleRenderUser()
+            navigate('/')
         } catch (err) {
             console.log(err)
         }

@@ -175,196 +175,274 @@ const GamePage = () => {
         <>
             <Navbar></Navbar>
 
-            {gameStatus && (
-                <>
+            <div style={styles.containerBox}>
+                {gameStatus && (
+                    <>
+                        {!gameInfo?.review && (
+                            <div style={styles.container}>
+                                {/* panstwo */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Panstwo:</label>
+                                    <input
+                                        type="text"
+                                        value={panstwo}
+                                        onChange={(e) =>
+                                            setPanstwo(e.target.value)
+                                        }
+                                        style={styles.input}
+                                        required
+                                    />
+                                </div>
+
+                                {/* miasto */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Miasto:</label>
+                                    <input
+                                        type="text"
+                                        value={miasto}
+                                        onChange={(e) =>
+                                            setMiasto(e.target.value)
+                                        }
+                                        style={styles.input}
+                                        required
+                                    />
+                                </div>
+
+                                {/* imie */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Imie:</label>
+                                    <input
+                                        type="text"
+                                        value={imie}
+                                        onChange={(e) =>
+                                            setImie(e.target.value)
+                                        }
+                                        style={styles.input}
+                                        required
+                                    />
+                                </div>
+
+                                {/* marka */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Marka:</label>
+                                    <input
+                                        type="text"
+                                        value={marka}
+                                        onChange={(e) =>
+                                            setMarka(e.target.value)
+                                        }
+                                        style={styles.input}
+                                        required
+                                    />
+                                </div>
+
+                                <div style={styles.btnBox}>
+                                    <button
+                                        type="submit"
+                                        onClick={handleSubmit}
+                                        style={styles.button}
+                                    >
+                                        CZAS STOP
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {gameInfo?.review && (
+                            <div style={styles.container}>
+                                {/* panstwo */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Panstwo:</label>
+                                    <p>
+                                        {gameInfo?.player0?.id === userInfo?.id
+                                            ? gameInfo?.player1?.answers
+                                                  ?.panstwo
+                                            : gameInfo?.player0?.answers
+                                                  ?.panstwo}
+                                    </p>
+                                    <input
+                                        type="checkbox"
+                                        checked={panstwoBox}
+                                        onChange={() =>
+                                            setPanstwoBox((state) => !state)
+                                        }
+                                    />
+                                </div>
+
+                                {/* miasto */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Miasto:</label>
+                                    <p>
+                                        {gameInfo?.player0?.id === userInfo?.id
+                                            ? gameInfo?.player1?.answers?.miasto
+                                            : gameInfo?.player0?.answers
+                                                  ?.miasto}
+                                    </p>
+                                    <input
+                                        type="checkbox"
+                                        checked={miastoBox}
+                                        onChange={() =>
+                                            setMiastoBox((state) => !state)
+                                        }
+                                    />
+                                </div>
+
+                                {/* imie */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Imie:</label>
+                                    <p>
+                                        {gameInfo?.player0?.id === userInfo?.id
+                                            ? gameInfo?.player1?.answers?.imie
+                                            : gameInfo?.player0?.answers?.imie}
+                                    </p>
+                                    <input
+                                        type="checkbox"
+                                        checked={imieBox}
+                                        onChange={() =>
+                                            setImieBox((state) => !state)
+                                        }
+                                    />
+                                </div>
+
+                                {/* marka */}
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Marka:</label>
+                                    <p>
+                                        {gameInfo?.player0?.id === userInfo?.id
+                                            ? gameInfo?.player1?.answers?.marka
+                                            : gameInfo?.player0?.answers?.marka}
+                                    </p>
+                                    <input
+                                        type="checkbox"
+                                        checked={markaBox}
+                                        onChange={() =>
+                                            setMarkaBox((state) => !state)
+                                        }
+                                    />
+                                </div>
+
+                                <div style={styles.btnBox}>
+                                    <button
+                                        type="submit"
+                                        onClick={handleSubmitReview}
+                                        style={styles.button}
+                                    >
+                                        WYŚLIJ OCENE
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {!gameStatus && (
                     <div>
-                        PTS:{' '}
+                        <h3> Game Over!</h3>
+
+                        <h1>
+                            Player{' '}
+                            {gameInfo.player0.points > gameInfo.player1.points
+                                ? gameInfo.player0.name
+                                : gameInfo.player1.name}{' '}
+                            won!
+                        </h1>
+
+                        <p>
+                            Score: {gameInfo.player0.name},{' '}
+                            {gameInfo.player0.points} pts :{' '}
+                            {gameInfo.player1.name}, {gameInfo.player1.points}{' '}
+                            pts
+                        </p>
+
+                        <button onClick={handleNewGame}>New Game</button>
+                    </div>
+                )}
+            </div>
+
+            {/* <div style={styles.controlPanel}>
+                <div>
+                    PTS:{' '}
+                    {gameInfo?.player0?.id === userInfo?.id
+                        ? gameInfo?.player0?.points
+                        : gameInfo?.player1?.points}
+                </div>
+                <div>ROUND: {gameInfo?.round}/3</div>
+            </div> */}
+
+            <div style={styles.containerPanel}>
+                <div style={styles.controlPanel}>
+                    {/* <button style={styles.buttonPanel}>Save</button>
+                    <button style={styles.buttonPanel}>Sign Out</button> */}
+
+                    <div>
+                        POINTS:{' '}
                         {gameInfo?.player0?.id === userInfo?.id
                             ? gameInfo?.player0?.points
                             : gameInfo?.player1?.points}
                     </div>
                     <div>ROUND: {gameInfo?.round}/3</div>
-
-                    {!gameInfo?.review && (
-                        <div style={styles.container}>
-                            {/* panstwo */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Panstwo:</label>
-                                <input
-                                    type="text"
-                                    value={panstwo}
-                                    onChange={(e) => setPanstwo(e.target.value)}
-                                    style={styles.input}
-                                    required
-                                />
-                            </div>
-
-                            {/* miasto */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Miasto:</label>
-                                <input
-                                    type="text"
-                                    value={miasto}
-                                    onChange={(e) => setMiasto(e.target.value)}
-                                    style={styles.input}
-                                    required
-                                />
-                            </div>
-
-                            {/* imie */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Imie:</label>
-                                <input
-                                    type="text"
-                                    value={imie}
-                                    onChange={(e) => setImie(e.target.value)}
-                                    style={styles.input}
-                                    required
-                                />
-                            </div>
-
-                            {/* marka */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Marka:</label>
-                                <input
-                                    type="text"
-                                    value={marka}
-                                    onChange={(e) => setMarka(e.target.value)}
-                                    style={styles.input}
-                                    required
-                                />
-                            </div>
-
-                            <div style={styles.btnBox}>
-                                <button
-                                    type="submit"
-                                    onClick={handleSubmit}
-                                    style={styles.button}
-                                >
-                                    CZAS STOP
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {gameInfo?.review && (
-                        <div style={styles.container}>
-                            {/* panstwo */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Panstwo:</label>
-                                <p>
-                                    {gameInfo?.player0?.id === userInfo?.id
-                                        ? gameInfo?.player1?.answers?.panstwo
-                                        : gameInfo?.player0?.answers?.panstwo}
-                                </p>
-                                <input
-                                    type="checkbox"
-                                    checked={panstwoBox}
-                                    onChange={() =>
-                                        setPanstwoBox((state) => !state)
-                                    }
-                                />
-                            </div>
-
-                            {/* miasto */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Miasto:</label>
-                                <p>
-                                    {gameInfo?.player0?.id === userInfo?.id
-                                        ? gameInfo?.player1?.answers?.miasto
-                                        : gameInfo?.player0?.answers?.miasto}
-                                </p>
-                                <input
-                                    type="checkbox"
-                                    checked={miastoBox}
-                                    onChange={() =>
-                                        setMiastoBox((state) => !state)
-                                    }
-                                />
-                            </div>
-
-                            {/* imie */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Imie:</label>
-                                <p>
-                                    {gameInfo?.player0?.id === userInfo?.id
-                                        ? gameInfo?.player1?.answers?.imie
-                                        : gameInfo?.player0?.answers?.imie}
-                                </p>
-                                <input
-                                    type="checkbox"
-                                    checked={imieBox}
-                                    onChange={() =>
-                                        setImieBox((state) => !state)
-                                    }
-                                />
-                            </div>
-
-                            {/* marka */}
-                            <div style={styles.inputContainer}>
-                                <label style={styles.label}>Marka:</label>
-                                <p>
-                                    {gameInfo?.player0?.id === userInfo?.id
-                                        ? gameInfo?.player1?.answers?.marka
-                                        : gameInfo?.player0?.answers?.marka}
-                                </p>
-                                <input
-                                    type="checkbox"
-                                    checked={markaBox}
-                                    onChange={() =>
-                                        setMarkaBox((state) => !state)
-                                    }
-                                />
-                            </div>
-
-                            <div style={styles.btnBox}>
-                                <button
-                                    type="submit"
-                                    onClick={handleSubmitReview}
-                                    style={styles.button}
-                                >
-                                    WYŚLIJ OCENE
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-
-            {!gameStatus && (
-                <div>
-                    <h3> Game Over!</h3>
-
-                    <h1>
-                        Player{' '}
-                        {gameInfo.player0.points > gameInfo.player1.points
-                            ? gameInfo.player0.name
-                            : gameInfo.player1.name}{' '}
-                        won!
-                    </h1>
-
-                    <p>
-                        Score: {gameInfo.player0.name},{' '}
-                        {gameInfo.player0.points} pts : {gameInfo.player1.name},{' '}
-                        {gameInfo.player1.points} pts
-                    </p>
-
-                    <button onClick={handleNewGame}>New Game</button>
                 </div>
-            )}
+            </div>
         </>
     )
 }
 
 const styles = {
+    containerPanel: {
+        width: '100%',
+        height: '110px',
+        // padding: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    controlPanel: {
+        width: '100%',
+        height: '50px',
+        marginLeft: '30px',
+        marginRight: '30px',
+        borderRadius: '50px',
+        backgroundColor: '#047cfc',
+        display: 'flex',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        color: 'white',
+    },
+
+    buttonPanel: {
+        // width: '35px',
+        height: '35px',
+        // padding: '0.75em 1.5em',
+        fontSize: '1em',
+        backgroundColor: '#0471f1',
+        color: 'white',
+        border: 'none',
+        borderRadius: '25px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
+        flex: 1,
+        marginLeft: '10px',
+        marginRight: '10px',
+    },
+
+    containerBox: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 'calc(100vh - 60px - 110px - 30px)',
+        marginTop: '30px',
+    },
     container: {
         padding: '20px',
-        backgroundColor: '#f4f4f9',
-        border: '1px solid #ccc',
+        // backgroundColor: '#f4f4f9',
+        // border: '1px solid #ccc',
         borderRadius: '5px',
         marginTop: '20px',
         margin: 'auto',
         height: '100%',
+        width: '80%',
     },
     inputContainer: {
         marginBottom: '15px',

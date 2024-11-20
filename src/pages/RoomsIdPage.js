@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import supabase from '../supabaseClient'
 import { getUserInfo } from '../services/authService'
+import { fetchGameInfo } from '../services/gameService'
 
 const RoomsIdPage = () => {
     const navigate = useNavigate()
@@ -40,6 +41,7 @@ const RoomsIdPage = () => {
                 points: 0,
                 answers: [],
                 ready: false,
+                avatar: user.avatar,
             }
 
             const gameUpdate = await supabase
@@ -133,6 +135,7 @@ const RoomsIdPage = () => {
     const getGameInfo = async () => {
         try {
             console.log('fething game info')
+            fetchGameInfo(id)
 
             const data = await supabase.from('rooms').select().eq('id', id)
 
@@ -210,10 +213,16 @@ const RoomsIdPage = () => {
                 {/* Player 1 Card */}
                 {game.player0 ? (
                     <div style={styles.playerCard}>
-                        <img
+                        {/* <img
                             src="https://via.placeholder.com/30" // Placeholder for account icon
                             alt="Account Icon"
                             style={styles.imgIcon}
+                        /> */}
+
+                        <img
+                            src={`https://xegmsphprxsopaotcvpj.supabase.co/storage/v1/object/public/icons/${game?.player0?.avatar}`} // Placeholder for account icon
+                            alt="Account Icon"
+                            style={styles.icon}
                         />
 
                         <h2 style={styles.playerName}>{game?.player0?.name}</h2>
@@ -243,10 +252,16 @@ const RoomsIdPage = () => {
                 {/* Player 2 Card */}
                 {game.player1 ? (
                     <div style={styles.playerCard}>
-                        <img
+                        {/* <img
                             src="https://via.placeholder.com/30" // Placeholder for account icon
                             alt="Account Icon"
                             style={styles.imgIcon}
+                        /> */}
+
+                        <img
+                            src={`https://xegmsphprxsopaotcvpj.supabase.co/storage/v1/object/public/icons/${game.player1}`} // Placeholder for account icon
+                            alt="Account Icon"
+                            style={styles.icon}
                         />
 
                         <h2 style={styles.playerName}>{game?.player1?.name}</h2>
@@ -274,10 +289,10 @@ const RoomsIdPage = () => {
 }
 
 const styles = {
-    imgIcon: {
-        height: '100px',
+    icon: {
         width: '100px',
-        borderRadius: '50%',
+        height: '100px',
+        borderRadius: '50%', // To make it circular
     },
 
     vsText: {
