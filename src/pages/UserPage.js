@@ -23,6 +23,8 @@ const UserPage = () => {
     const [avatarData, setAvatarData] = useState()
 
     const handleAvatarChange = (event) => {
+        if (!event.target.files[0]) return
+
         console.log('AVATAR INFO: ', Date.now(), event.target.files[0])
 
         setAvatarData(event.target.files[0])

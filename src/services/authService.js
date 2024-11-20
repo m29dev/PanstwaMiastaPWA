@@ -43,13 +43,18 @@ export const signUp = async (name, password, avatar) => {
             .select()
             .eq('name', name)
 
-        if (dataCheck) return alert('user already exists')
+        console.log(dataCheck)
+        if (dataCheck.data.length > 0) return alert('user already exists')
 
         // create an user
         const dataUser = await supabase
             .from('users') // Change 'users' to your table name
             .insert([
-                { name: name, password: password, avatar: avatar }, // Adjust object keys to match your table columns
+                {
+                    name: name,
+                    password: password,
+                    avatar: 'default-avatar.png',
+                }, // Adjust object keys to match your table columns
             ])
             .select()
 
